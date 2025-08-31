@@ -4,7 +4,7 @@ from datetime import timedelta
 DOMAIN = "dresden_transport"
 SCAN_INTERVAL = timedelta(seconds=90)
 API_ENDPOINT = "https://webapi.vvo-online.de/dm"
-API_MAX_RESULTS = 10
+API_MAX_RESULTS = 20
 
 DEFAULT_ICON = "mdi:clock"
 
@@ -13,6 +13,8 @@ CONF_DEPARTURES_NAME = "name"
 CONF_DEPARTURES_STOP_ID = "stop_id"
 CONF_DEPARTURES_WALKING_TIME = "walking_time"
 CONF_DEPARTURES_DIRECTION = "direction"
+CONF_DEPARTURES_LINE_NAME = "line_name"
+CONF_DEPARTURES_PLATFORM = "platform"
 CONF_TYPE_SUBURBAN = "suburban"
 CONF_TYPE_SUBWAY = "subway"
 CONF_TYPE_TRAM = "Tram"

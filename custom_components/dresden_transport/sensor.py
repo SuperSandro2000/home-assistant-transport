@@ -2,6 +2,7 @@
 """Dresden (VVO) transport integration."""
 from __future__ import annotations
 import logging
+import re
 from typing import Optional
 from datetime import datetime, timedelta
 
@@ -22,6 +23,8 @@ from .const import (  # pylint: disable=unused-import
     CONF_DEPARTURES_DIRECTION,
     CONF_DEPARTURES_STOP_ID,
     CONF_DEPARTURES_WALKING_TIME,
+    CONF_DEPARTURES_LINE_NAME,
+    CONF_DEPARTURES_PLATFORM,
     CONF_TYPE_BUS,
     CONF_TYPE_EXPRESS,
     CONF_TYPE_FERRY,
@@ -53,6 +56,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
                 vol.Required(CONF_DEPARTURES_NAME): str,
                 vol.Required(CONF_DEPARTURES_STOP_ID): int,
                 vol.Optional(CONF_DEPARTURES_DIRECTION): str,
+                vol.Optional(CONF_DEPARTURES_LINE_NAME): str,
+                vol.Optional(CONF_DEPARTURES_PLATFORM): str,
                 vol.Optional(CONF_DEPARTURES_WALKING_TIME, default=1): int,
                 **TRANSPORT_TYPES_SCHEMA,
             }
@@ -81,6 +86,10 @@ class TransportSensor(SensorEntity):
         self.stop_id: int = config[CONF_DEPARTURES_STOP_ID]
         self.sensor_name: str | None = config.get(CONF_DEPARTURES_NAME)
         self.direction: str | None = config.get(CONF_DEPARTURES_DIRECTION)
+        self.line_name: str | None = config.get(CONF_DEPARTURES_LINE_NAME)
+        # Ensure platform is always a string or None to avoid EntityPlatform confusion
+        platform_value = config.get(CONF_DEPARTURES_PLATFORM)
+        self.platform_stop: str | None = str(platform_value) if platform_value is not None else None
         self.walking_time: int = config.get(CONF_DEPARTURES_WALKING_TIME) or 1
         # we add +1 minute anyway to delete the "just gone" transport
 
@@ -97,20 +106,56 @@ class TransportSensor(SensorEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"stop_{self.stop_id}_departures"
+        base_id = f"stop_{self.stop_id}_departures"
+        if self.line_name and isinstance(self.line_name, str):
+            # Clean line name for use in unique_id (remove special characters)
+            clean_line = re.sub(r'[^a-zA-Z0-9]', '_', self.line_name)
+            base_id += f"_line_{clean_line}"
+        if self.direction and isinstance(self.direction, str):
+            # Clean direction for use in unique_id (remove special characters and limit length)
+            clean_direction = re.sub(r'[^a-zA-Z0-9]', '_', self.direction)[:20]
+            base_id += f"_dir_{clean_direction}"
+        if self.platform_stop and isinstance(self.platform_stop, str):
+            # Clean platform for use in unique_id
+            clean_platform = re.sub(r'[^a-zA-Z0-9]', '_', self.platform_stop)
+            base_id += f"_plat_{clean_platform}"
+        return base_id
 
     @property
     def state(self) -> str:
         next_departure = self.next_departure()
         if next_departure:
-            return f"Next {next_departure.line_name} at {next_departure.time}"
+            line_info = f"{next_departure.line_name}"
+            direction_info = ""
+            if next_departure.direction:
+                direction_info = f" to {next_departure.direction}"
+            elif next_departure.platform:
+                direction_info = f" (Platform {next_departure.platform})"
+            
+            gap_info = f" in {next_departure.gap} min" if next_departure.gap > 0 else " now"
+            return f"Next {line_info}{direction_info}{gap_info}"
         return "N/A"
 
     @property
     def extra_state_attributes(self):
-        return {
+        attributes = {
             "departures": [departure.to_dict() for departure in self.departures or []]
         }
+        
+        # Add filter information to attributes (ensure all values are serializable)
+        if self.line_name and isinstance(self.line_name, str):
+            attributes["filtered_line"] = self.line_name
+        if self.direction and isinstance(self.direction, str):
+            attributes["filtered_direction"] = self.direction
+        if self.platform_stop and isinstance(self.platform_stop, str):
+            attributes["filtered_platform"] = self.platform_stop
+        
+        # Debug: Log attribute types to help identify serialization issues
+        _LOGGER.debug(f"Sensor {self.unique_id} attributes: {type(attributes)}")
+        for key, value in attributes.items():
+            _LOGGER.debug(f"  {key}: {type(value)} = {value}")
+            
+        return attributes
 
     def update(self):
         self.departures = self.fetch_departures()
@@ -151,7 +196,20 @@ class TransportSensor(SensorEntity):
 
         # convert api data into objects
         unsorted = [Departure.from_dict(departure) for departure in departures]
-        return sorted(unsorted, key=lambda d: d.timestamp)
+        
+        # apply filters if specified
+        filtered_departures = unsorted
+        
+        if self.line_name:
+            filtered_departures = [d for d in filtered_departures if d.line_name == self.line_name]
+        
+        if self.direction:
+            filtered_departures = [d for d in filtered_departures if d.direction and self.direction.lower() in d.direction.lower()]
+        
+        if self.platform_stop:
+            filtered_departures = [d for d in filtered_departures if d.platform == self.platform_stop]
+        
+        return sorted(filtered_departures, key=lambda d: d.timestamp)
 
     def next_departure(self):
         if self.departures and isinstance(self.departures, list):

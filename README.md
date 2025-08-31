@@ -39,14 +39,43 @@ Or use a nice [dvbpy](https://github.com/kiliankoe/dvbpy) library for that :)
 sensor:
   - platform: dresden_transport
     departures:
+      # Basic configuration - shows all departures from a stop
       - name: "Dresden Zoo" # free-form name, only for display purposes
         stop_id: 33000112 # actual Stop ID for the API
-      - name: "Altmarkt" # you can add more that one stop to track
-        stop_id: 33000004
         
-        # Optional parameter with value in minutes that hide transport closer than N minutes
-        # walking_time: 5
+      # Filter by specific line
+      - name: "Tram Line 4"
+        stop_id: 33000013
+        line_name: "4"
+        
+      # Filter by line and direction
+      - name: "Tram 4 to Weinböhla"
+        stop_id: 33000013
+        line_name: "4"
+        direction: "Weinböhla"
+        
+      # Filter by line and platform
+      - name: "Bus 61 Platform A"
+        stop_id: 33000018
+        line_name: "61"
+        platform: "A"
+        
+      # Optional parameters
+      - name: "Altmarkt"
+        stop_id: 33000004
+        walking_time: 5 # Hide transport closer than N minutes (default: 1)
 ```
+
+**Available configuration options:**
+
+- `name` (required): Display name for the sensor
+- `stop_id` (required): VVO Stop ID from the API
+- `line_name` (optional): Filter departures for specific line (e.g., "4", "61", "S1")
+- `direction` (optional): Filter by destination/direction (partial match, case insensitive)
+- `platform` (optional): Filter by platform/track designation
+- `walking_time` (optional): Hide departures closer than N minutes (default: 1)
+
+**Note:** When using `line_name`, `direction`, or `platform` filters, only departures matching ALL specified criteria will be shown. The sensor state will display the next departure for that specific line/direction combination.
 
 **4.** Restart Home Assistant core again and you should now see two new entities (however, it may take some time for them to fetch new data). If you don't see anything new — check the logs (Settings -> System -> Logs). Some error should pop up there.
 
