@@ -1,0 +1,29 @@
+# https://github.com/kiliankoe/vvo/blob/main/documentation/webapi.md
+
+POST https://webapi.vvo-online.de/dm
+Content-Type: application/json
+Accept: application/json
+
+{
+    "stopid": "33000123",
+    "limit": 20,
+    "isarrival": false,
+    "shorttermchanges": true,
+    "mot": [
+        "Tram",
+        "CityBus",
+        "IntercityBus",
+        "SuburbanRailway",
+        "Train",
+        "Ferry",
+        "HailRequestBus",
+        "Cableway"
+    ]
+}
+
+
+### Find a point of interest
+@poi = "SearchTerm"
+
+GET https://webapi.vvo-online.de/tr/pointfinder?format=JSON&stopsOnly=True&query={{poi}}&dvb=True
+Accept: application/json
