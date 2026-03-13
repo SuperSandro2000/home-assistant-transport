@@ -11,6 +11,16 @@ class DresdenTransportCard extends LitElement {
   getDepatures() {
     const maxEntries = this.config.max_entries || 10;
     const allDepartures = [];
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const minutesUntilDeparture = (time) => {
+      const [hours, minutes] = time.split(":").map(Number);
+      const departureMinutes = hours * 60 + minutes;
+      return departureMinutes >= currentMinutes
+        ? departureMinutes - currentMinutes
+        : departureMinutes + 24 * 60 - currentMinutes;
+    };
 
     for (const ent of this.config.entities) {
       const stateObj = this.hass.states[ent];
@@ -21,7 +31,7 @@ class DresdenTransportCard extends LitElement {
       }
     }
 
-    allDepartures.sort((a, b) => a.time.localeCompare(b.time));
+    allDepartures.sort((a, b) => minutesUntilDeparture(a.time) - minutesUntilDeparture(b.time));
 
     return allDepartures.slice(0, maxEntries);
   }
