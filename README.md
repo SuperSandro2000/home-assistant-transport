@@ -4,8 +4,6 @@ Custom sensor component and lovelace card that displays upcoming departures from
 
 ![](./docs/screenshots/timetable-card.png)
 
-> I use [iOS Dark Mode Theme](https://github.com/basnijholt/lovelace-ios-dark-mode-theme) by @basnijholt, installed from [HACS](https://hacs.xyz/)
-
 ## 💿 Installation
 
 The component consists of two parts:
