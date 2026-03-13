@@ -11,40 +11,44 @@ class DresdenTransportCard extends LitElement {
   render() {
     const maxEntries = this.config.max_entries || 10;
     return html`
+    <ha-card><div class="container">
     ${this.config.entities.map(ent => {
         const stateObj = this.hass.states[ent];
         return stateObj
           ? html`
-            <ha-card><div class="container">
             ${this.config.show_stop_name
               ? html`<div class="stop">${stateObj.attributes.friendly_name}</div>`
               : nothing
             }
-              <div class="departures">
-                ${stateObj.attributes.departures.slice(0, maxEntries).map((departure) =>
-                  html`
-                    <div class="departure">
-                      <div class="line">
-                          <div class="line-icon" style="background-color: ${departure.color}">${departure.line_name}</div>
-                          <div class="line-pl">${departure.platform}</div>
+            ${stateObj.attributes.departures.length > 0
+              ? html`
+                <div class="departures">
+                  ${stateObj.attributes.departures.slice(0, maxEntries).map((departure) =>
+                    html`
+                      <div class="departure">
+                        <div class="line">
+                            <div class="line-icon" style="background-color: ${departure.color}">${departure.line_name}</div>
+                            <div class="line-pl">${departure.platform}</div>
+                        </div>
+                        <div class="direction">${departure.direction}</div>
+                        <div class="time-slot">
+                            ${this.config.show_gap
+                              ? html`<div class="todeparture">(+${departure.gap})</div>`
+                              : nothing
+                            }
+                            <div class="time">${departure.time}</div>
+                        </div>
                       </div>
-                      <div class="direction">${departure.direction}</div>
-                      <div class="time-slot">
-                          ${this.config.show_gap
-                            ? html`<div class="todeparture">(+${departure.gap})</div>`
-                            : nothing
-                          }
-                          <div class="time">${departure.time}</div>
-                      </div>
-                    </div>
-                `)}
+                  `)}
               </div>
-            </div></ha-card>
+              `
+            : nothing}
             `
           : html`
               <div class="not-found">Entity ${ent} not found.</div>
             `;
     })}
+    </div></ha-card>
     `;
   }
 
@@ -78,7 +82,6 @@ class DresdenTransportCard extends LitElement {
             width: 100%;
             font-weight: 400;
             line-height: 1.5em;
-            padding-bottom: 20px;
             display: flex;
             flex-direction: column;
         }
