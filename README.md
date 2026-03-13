@@ -92,12 +92,12 @@ When sensor component is installed and working you can add the new fancy widget 
 **4.** Now you can add the custom card and integrate it with your sensor. Click "Add card -> Manual" or just go to "Raw configuration editor" and use this config.
 
 ```yaml
-- type: custom:dresden-transport-card
-  show_stop_name: true # show or hide the name of your stop in card title
-  max_entries: 8 # number of upcoming departures to show (max: 10)
-  entities:
-    - sensor.dresden_zoo # use your entity IDs here
-    - sensor.altmarkt # they might be different from mine
+type: custom:dresden-transport-card
+show_stop_name: true # show or hide the name of your stop in card title
+max_entries: 8 # number of upcoming departures to show (max: 10)
+entities:
+  - sensor.dresden_zoo # use your entity IDs here
+  - sensor.altmarkt # they might be different from mine
 ```
 
 ## 🚨 Update
