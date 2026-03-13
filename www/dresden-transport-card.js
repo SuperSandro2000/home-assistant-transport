@@ -1,9 +1,4 @@
-import {
-  LitElement,
-  html,
-  css,
-  nothing
-} from "https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js";
+import { LitElement, html, css, nothing } from "lit";
 
 class DresdenTransportCard extends LitElement {
     static get properties() {
@@ -26,7 +21,7 @@ class DresdenTransportCard extends LitElement {
               : nothing
             }
               <div class="departures">
-                ${stateObj.attributes.departures.slice(0, maxEntries).map((departure) => 
+                ${stateObj.attributes.departures.slice(0, maxEntries).map((departure) =>
                   html`
                     <div class="departure">
                       <div class="line">
@@ -38,7 +33,7 @@ class DresdenTransportCard extends LitElement {
                           ${this.config.show_gap
                             ? html`<div class="todeparture">(+${departure.gap})</div>`
                             : nothing
-                          } 
+                          }
                           <div class="time">${departure.time}</div>
                       </div>
                     </div>
@@ -78,7 +73,7 @@ class DresdenTransportCard extends LitElement {
             width: 100%;
             text-align: left;
             padding: 10px 10px 5px 5px;
-        }      
+        }
         .departures {
             width: 100%;
             font-weight: 400;

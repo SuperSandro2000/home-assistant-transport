@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "rollup": "rollup -c"
+  },
+  "type": "module",
+  "dependencies": {
+    "lit": "^3.3.2"
+  },
+  "devDependencies": {
+    "@lit-labs/rollup-plugin-minify-html-literals": "^0.1.1",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^1.0.0",
+    "rollup": "^4.59.0"
+  }
+}
