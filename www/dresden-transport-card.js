@@ -8,45 +8,47 @@ class DresdenTransportCard extends LitElement {
     };
   }
 
+  getDepatures() {
+    const maxEntries = this.config.max_entries || 10;
+    const allDepartures = [];
+
+    for (const ent of this.config.entities) {
+      const stateObj = this.hass.states[ent];
+      if (stateObj) {
+        allDepartures.push(...stateObj.attributes.departures);
+      } else {
+        throw new Error(`Entity ${ent} not found.`);
+      }
+    }
+
+    allDepartures.sort((a, b) => a.time.localeCompare(b.time));
+
+    return allDepartures.slice(0, maxEntries);
+  }
+
   render() {
     const maxEntries = this.config.max_entries || 10;
     return html`
     <ha-card><div class="container">
-    ${this.config.entities.map(ent => {
-        const stateObj = this.hass.states[ent];
-        return stateObj
-          ? html`
-            ${this.config.show_stop_name
-              ? html`<div class="stop">${stateObj.attributes.friendly_name}</div>`
-              : nothing
-            }
-            ${stateObj.attributes.departures.length > 0
-              ? html`
-                <div class="departures">
-                  ${stateObj.attributes.departures.slice(0, maxEntries).map((departure) =>
-                    html`
-                      <div class="departure">
-                        <div class="line">
-                            <div class="line-icon" style="background-color: ${departure.color}">${departure.line_name}</div>
-                            <div class="line-pl">${departure.platform}</div>
-                        </div>
-                        <div class="direction">${departure.direction}</div>
-                        <div class="time-slot">
-                            ${this.config.show_gap
-                              ? html`<div class="todeparture">(+${departure.gap})</div>`
-                              : nothing
-                            }
-                            <div class="time">${departure.time}</div>
-                        </div>
-                      </div>
-                  `)}
-              </div>
-              `
-            : nothing}
-            `
-          : html`
-              <div class="not-found">Entity ${ent} not found.</div>
-            `;
+    ${this.getDepatures().map(departure => {
+      return html`
+        <div class="departures">
+          <div class="departure">
+            <div class="line">
+              <div class="line-icon" style="background-color: ${departure.color}">${departure.line_name}</div>
+              <div class="line-pl">${departure.platform}</div>
+            </div>
+            <div class="direction">${departure.direction}</div>
+            <div class="time-slot">
+              ${this.config.show_gap
+                ? html`<div class="todeparture">(+${departure.gap})</div>`
+                : nothing
+              }
+              <div class="time">${departure.time}</div>
+            </div>
+          </div>
+        </div>
+      `;
     })}
     </div></ha-card>
     `;

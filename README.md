@@ -93,7 +93,6 @@ When sensor component is installed and working you can add the new fancy widget 
 
 ```yaml
 type: custom:dresden-transport-card
-show_stop_name: true # show or hide the name of your stop in card title
 max_entries: 8 # number of upcoming departures to show (max: 10)
 entities:
   - sensor.dresden_zoo # use your entity IDs here

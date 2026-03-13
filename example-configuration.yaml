@@ -8,27 +8,27 @@ sensor:
       - name: "Hauptbahnhof All Departures"
         stop_id: 33000013
         walking_time: 2
-        
+
       # Filter by specific line
       - name: "Tram Line 4"
         stop_id: 33000013
         line_name: "4"
         walking_time: 2
-        
+
       # Filter by line and direction
       - name: "Tram 4 to Weinböhla"
         stop_id: 33000013
-        line_name: "4" 
+        line_name: "4"
         direction: "Weinböhla"
         walking_time: 2
-        
+
       # Filter by line and platform
       - name: "Tram 4 Platform 1"
         stop_id: 33000013
         line_name: "4"
         platform: "1"
         walking_time: 2
-        
+
       # Bus example with direction filter
       - name: "Bus 61 to Airport"
         stop_id: 33000018
@@ -38,11 +38,10 @@ sensor:
 
 # Lovelace card configuration example
 # Add this to your dashboard:
-# 
+#
 # - type: custom:dresden-transport-card
 #   entities:
 #     - sensor.tram_line_4
 #     - sensor.bus_61_to_airport
-#   show_stop_name: true
 #   show_gap: true
 #   max_entries: 5
